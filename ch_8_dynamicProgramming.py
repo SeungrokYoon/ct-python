@@ -18,8 +18,6 @@ def piboMain(n):
         return cache[n]
 
     return pibo(n)
-print(piboMain(100))
-
 
 #2. 1로 만들기
 """
@@ -28,48 +26,116 @@ print(piboMain(100))
 탑다운으로 생각하면 오히려 오래 걸리는 문제.
 """
 def toOne(n):
+    dp_table = [0]*(n+1)
+    for i in range(1, n+1):
+        if i==1:
+            dp_table[i] = 0
+            continue
+        if i==2:
+            dp_table[i] = 1
+            continue
+        #여기에 걸리는 녀석들은 i가 3부터일때이다.
+        if  i%5 ==0:
+            #min을 i-1인덱스의 값과 함께 쓰는 것이 이 문제의 kick 이다!
+            dp_table[i] = min(dp_table[i//5],dp_table[i-1])+1
+        elif i%3 ==0:
+            dp_table[i] = min(dp_table[i//3],dp_table[i-1])+1
+        elif i%2 ==0:
+            dp_table[i] = min(dp_table[i//2],dp_table[i-1])+1
+        else:
+            dp_table[i] = dp_table[i-1]+1
+    return dp_table[n]
+
+#정답 코드
+
+def toOne_answer(n):
     d= [0]*30001
     for i in range(2, n+1):
         d[i] = d[i-1]+1
         if i%2 ==0:
-            d[i] = min(d[i],d[i//2]+1)
+            d[i] = min(d[i], d[i//2]+1)
         if i%3 ==0:
-            d[i] = min(d[i], d[i//3]+1)
-        if i%5==0:
-            d[i] = min(d[i], d[i//5]+1)
-    return d[i]
+            d[i] = min(d[i],d[i//3]+1)
+        if i%5 ==0:
+            d[i] = min(d[i],d[i//5]+1)
+    return d[n]
 
-print(toOne(26))
+"""
+내 코드와 정답 코드 둘 다 마지막 테이블의 값들이 일치. 
+미리 +1을 해서 min 을 비교하는 것과, 비교하고 +1을 하는 것이 일치. 중요한건 바텀 업이라는 것! 중복되는 작업이 많다면, 바텀 업을 고민해보자. 
+"""
 
 
 #3. 개미 전사
+"""
+이 문제도 바텀 업일까....?
+"""
 import sys
-def ant_warrior():
-    input = sys.stdin.readline
-    n = int(input().rstrip())
-    alist = list(map(int, input().rstrip().split()))
+def ant_warriors():
+    input= sys.stdin.readline
+    N = int(input())
+    house = list(map(int, input().split()))
+    robbing = [0]*100
+    robbing[0] = house[0]
+    robbing[1] = max(house[0],house[1])
+    for i in range(2,N):
+        robbing[i]= max(robbing[i-2]+house[i],robbing[i-1])
+    print(robbing[N-1])
 
-    #반복문을 사용한 바텀업 방식이 효율적일 듯 하다.
-    #n번 창고를 털 때 까지의 최대값을 기록해 두자.
-    dp_table = [0]*(n)
-    dp_table[0]= alist[0]
-    dp_table[1] = max(alist[0], alist[1])
-    for i in range(2, n):
-        dp_table[i] = max(dp_table[i-1], dp_table[i-2]+alist[i])
-    print(dp_table[n-1])
+#4. 바닥 공사
+"""
+다이나믹 프로그래밍의 기초 예제인 타일링 문제 유형
+"""
+import sys
+def tile():
+    input= sys.stdin.readline
+    n= int(input())
+    case = [0]*1001
+    case[1]=1
+    case[2]=3
+    for i in range(3,n+1):
+        case[i] = (case[i-1]+2*case[i-2]) %796796
+    return case[n]
+
+#5. 효율적인 화폐 구성
+
+import sys
+def coins():
+    #값 입력 받기
+    input= sys.stdin.readline
+    N,M = map(int, (input().rstrip().split()))
+    #다이나믹 프로그래밍을 위해서 담아놓기
+    coins=[]
+    table = [10001]*(M+1)
+    for _ in range(N):
+        coins.append(int(input()))
+    table[0] = 0
+    coins.sort()
+
+    #핵심 로직
+    """
+    coins에 담겨있는 녀석들로만 조합을 맞추면 된다.
+    """
+    for i in range(N):
+        for j in range(coins[i], M+1):
+            #여기서 j-coins[i] 는 list index out of range를 발생시키지 않는다.
+            if table[j- coins[i]] != 10001:
+                table[j] = min(table[j], table[j-coins[i]]+1)
+    if table[M] == 10001:
+        return -1
+    return table[M]
 
 
 
 
-    #아래 내 코드가 틀린 이유: 이 문제는 단순히 홀 짝 매커니즘이 아니다.
-    # for i in range(1,n+1):
-    #     if i-2<=0:
-    #         storage[i] = alist[i]
-    #     if i-2>0:
-    #         storage[i] = storage[i-2]+alist[i]
-    # print( max(storage[n-1], storage[n]))
-    # return max(storage[n-1], storage[n])
-ant_warrior()
+
+if __name__ =='__main__':
+
+    print(piboMain(100))
+    print(toOne(26))
+    print(ant_warriors())
+    print(tile())
+    print(coins())
 
 
 
